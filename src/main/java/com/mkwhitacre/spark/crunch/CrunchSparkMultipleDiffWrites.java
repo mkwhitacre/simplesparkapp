@@ -33,7 +33,7 @@ public class CrunchSparkMultipleDiffWrites extends Configured implements Tool, S
             sc.addJar(jarFile);
         }
 
-        SparkPipeline pipeline = new SparkPipeline(sc, "Crunch Spark Count");
+        SparkPipeline pipeline = new SparkPipeline(sc, "Crunch Spark Count Multiple Diff Writes");
 
         String inputFile = args[0];
         final int threshold = Integer.parseInt(args[1]);
@@ -62,7 +62,7 @@ public class CrunchSparkMultipleDiffWrites extends Configured implements Tool, S
 				return Pair.of(input.first(), count);
 			}
         }, Writables.tableOf(Writables.strings(),  Writables.ints()));
-        wordCount.write(To.textFile("/tmp/word_count_out"), WriteMode.OVERWRITE);
+        wordCount.write(To.textFile("/tmp/crunch/word_count_out"), WriteMode.OVERWRITE);
         		
         		
         PCollection<String> filteredStrings  = groupedStrings.parallelDo("Filter words not satisfying threshold",new DoFn<Pair<String, Iterable<String>>, String>() {
@@ -88,7 +88,7 @@ public class CrunchSparkMultipleDiffWrites extends Configured implements Tool, S
             }
         }, Writables.tableOf(Writables.strings(), Writables.ints())).groupByKey().combineValues(Aggregators.SUM_INTS());
         
-        charCountPCollection.write(To.textFile("/tmp/char_count_out"), WriteMode.OVERWRITE);
+        charCountPCollection.write(To.textFile("/tmp/crunch/char_count_out"), WriteMode.OVERWRITE);
         
         for(Pair<String, Integer> value: charCountPCollection.materialize()){
             System.out.println("("+value.first()+", "+value.second()+")");

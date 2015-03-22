@@ -39,7 +39,7 @@ public class CrunchSparkMultipleWrites extends Configured implements Tool, Seria
             sc.addJar(jarFile);
         }
 
-        SparkPipeline pipeline = new SparkPipeline(sc, "Crunch Spark Count");
+        SparkPipeline pipeline = new SparkPipeline(sc, "Crunch Spark Multiple Writes");
 
         String inputFile = args[0];
         final int threshold = Integer.parseInt(args[1]);

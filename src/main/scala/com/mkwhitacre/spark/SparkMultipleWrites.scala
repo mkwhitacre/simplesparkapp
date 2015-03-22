@@ -5,7 +5,7 @@ import org.apache.spark.SparkContext._
 
 object SparkMultipleWrites {
   def main(args: Array[String]) {
-    val sc = new SparkContext(new SparkConf().setAppName("Spark Counts Reuse Collections"))
+    val sc = new SparkContext(new SparkConf().setAppName("Spark Counts Multiple Writes"))
     val threshold = args(1).toInt
 
     // split each document into words
