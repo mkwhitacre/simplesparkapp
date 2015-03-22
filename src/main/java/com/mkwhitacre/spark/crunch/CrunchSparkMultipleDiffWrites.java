@@ -1,12 +1,6 @@
 package com.mkwhitacre.spark.crunch;
 
-import org.apache.crunch.DoFn;
-import org.apache.crunch.Emitter;
-import org.apache.crunch.MapFn;
-import org.apache.crunch.PCollection;
-import org.apache.crunch.PGroupedTable;
-import org.apache.crunch.PTable;
-import org.apache.crunch.Pair;
+import org.apache.crunch.*;
 import org.apache.crunch.Target.WriteMode;
 import org.apache.crunch.fn.Aggregators;
 import org.apache.crunch.impl.spark.SparkPipeline;
@@ -23,18 +17,18 @@ import org.apache.spark.api.java.JavaSparkContext;
 
 import java.io.Serializable;
 
-public class CrunchSparkMultipleWrites extends Configured implements Tool, Serializable{
+public class CrunchSparkMultipleDiffWrites extends Configured implements Tool, Serializable{
 
     public static void main(String[] args) throws Exception {
         Configuration config = new Configuration();
-        ToolRunner.run(config, new CrunchSparkMultipleWrites(), args);
+        ToolRunner.run(config, new CrunchSparkMultipleDiffWrites(), args);
     }
 
     @Override
     public int run(String[] args) throws Exception {
 
         JavaSparkContext sc = new JavaSparkContext(new SparkConf());
-        String[] jars = JavaSparkContext.jarOfClass(CrunchSparkMultipleWrites.class);
+        String[] jars = JavaSparkContext.jarOfClass(CrunchSparkMultipleDiffWrites.class);
         for(String jarFile : jars){
             sc.addJar(jarFile);
         }
@@ -68,13 +62,19 @@ public class CrunchSparkMultipleWrites extends Configured implements Tool, Seria
 				return Pair.of(input.first(), count);
 			}
         }, Writables.tableOf(Writables.strings(),  Writables.ints()));
+        wordCount.write(To.textFile("/tmp/word_count_out"), WriteMode.OVERWRITE);
         		
         		
-        PCollection<String> filteredStrings  = wordCount.parallelDo("Filter words not satisfying threshold",new DoFn<Pair<String, Integer>, String>() {
+        PCollection<String> filteredStrings  = groupedStrings.parallelDo("Filter words not satisfying threshold",new DoFn<Pair<String, Iterable<String>>, String>() {
             @Override
-            public void process(Pair<String, Integer> input, Emitter<String> emitter) {
-            	if(input.second() >= threshold){
-                    emitter.emit(input.first());
+            public void process(Pair<String, Iterable<String>> stringIterablePair, Emitter<String> emitter) {
+            	int count = 0;
+				for(String s: stringIterablePair.second()){
+					count++;
+				}
+            	
+            	if(count >= threshold){
+                    emitter.emit(stringIterablePair.first());
                 }
             }
         }, Writables.strings());
@@ -88,8 +88,7 @@ public class CrunchSparkMultipleWrites extends Configured implements Tool, Seria
             }
         }, Writables.tableOf(Writables.strings(), Writables.ints())).groupByKey().combineValues(Aggregators.SUM_INTS());
         
-        charCountPCollection.write(To.textFile("/tmp/char_count_out1"), WriteMode.OVERWRITE);
-        charCountPCollection.write(To.textFile("/tmp/char_count_out2"), WriteMode.OVERWRITE);
+        charCountPCollection.write(To.textFile("/tmp/char_count_out"), WriteMode.OVERWRITE);
         
         for(Pair<String, Integer> value: charCountPCollection.materialize()){
             System.out.println("("+value.first()+", "+value.second()+")");

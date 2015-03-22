@@ -23,18 +23,18 @@ import org.apache.spark.api.java.JavaSparkContext;
 
 import java.io.Serializable;
 
-public class CrunchSparkReuseSourceTargets extends Configured implements Tool, Serializable{
+public class CrunchSparkReuseCollections extends Configured implements Tool, Serializable{
 
     public static void main(String[] args) throws Exception {
         Configuration config = new Configuration();
-        ToolRunner.run(config, new CrunchSparkReuseSourceTargets(), args);
+        ToolRunner.run(config, new CrunchSparkReuseCollections(), args);
     }
 
     @Override
     public int run(String[] args) throws Exception {
 
         JavaSparkContext sc = new JavaSparkContext(new SparkConf());
-        String[] jars = JavaSparkContext.jarOfClass(CrunchSparkReuseSourceTargets.class);
+        String[] jars = JavaSparkContext.jarOfClass(CrunchSparkReuseCollections.class);
         for(String jarFile : jars){
             sc.addJar(jarFile);
         }
