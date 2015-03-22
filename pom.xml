@@ -74,6 +74,24 @@
           <target>1.6</target>
         </configuration>
       </plugin>
+        <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-shade-plugin</artifactId>
+              <executions>
+                  <execution>
+                      <phase>package</phase>
+                      <goals>
+                          <goal>shade</goal>
+                      </goals>
+                      <configuration>
+                          <transformers>
+                              <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                          </transformers>
+                          <createDependencyReducedPom>true</createDependencyReducedPom>
+                      </configuration>
+                  </execution>
+              </executions>
+          </plugin>
     </plugins>  
   </build>
 
@@ -82,11 +100,13 @@
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
       <version>2.10.4</version>
+        <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.spark</groupId>
       <artifactId>spark-core_2.10</artifactId>
-      <version>1.2.0-cdh5.3.0</version>
+      <version>1.2.0-cdh5.3.2</version>
+        <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.crunch</groupId>
