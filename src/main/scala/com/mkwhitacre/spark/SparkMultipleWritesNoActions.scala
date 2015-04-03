@@ -1,7 +1,6 @@
 package com.mkwhitacre.spark
 
 import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.SparkContext._
 
 object SparkMultipleWritesNoAction {
   def main(args: Array[String]) {
